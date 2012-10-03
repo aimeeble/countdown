@@ -51,6 +51,8 @@ class Countdown(object):
             raise ValueError("invalid event format: %s" % raw_event)
          self.events.append(event)
 
+      self.events.sort(lambda x,y: (x.when-y.when).days)
+
    def __str__(self):
       res = ''
       nl = ''
