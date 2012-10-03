@@ -14,7 +14,7 @@ class Event(object):
    def from_string(cls, s):
       parts = s.split(' ')
       date = parts[0]
-      description = ' '.join(parts[1:]).strip()
+      description = ' '.join(parts[1:])
 
       try:
          when = datetime.datetime.strptime(date, '%Y-%m-%d').date()
@@ -40,6 +40,12 @@ class Countdown(object):
          raw_data = fh.readlines()
 
       for raw_event in raw_data:
+         raw_event = raw_event.strip()
+
+         # skip comments and blank lines
+         if not raw_event or raw_event[0] == '#':
+            continue
+
          event = Event.from_string(raw_event)
          if not event:
             raise ValueError("invalid event format: %s" % raw_event)
