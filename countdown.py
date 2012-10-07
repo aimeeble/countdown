@@ -47,7 +47,7 @@ class Event(object):
 
    def relative_months(self):
       days = self.relative_days()
-      return float(days) / 31.
+      return float(days) / 30.
 
    def relative_years(self):
       days = self.relative_days()
