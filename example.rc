@@ -1,0 +1,13 @@
+#
+# Countdown/countup dates and events. If a date ends in !, it includes both end
+# days, otherwise, it only includes one. Blank lines and lines starting with #
+# are ignored. Sections can be created by making the first char -.
+#
+# Example:
+# - Section Title
+# YYYY-mm-dd[!] [event description]
+#
+
+# Example days
+2012-12-25 Christmas
+2012-01-01! New Year's Day
