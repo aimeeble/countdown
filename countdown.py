@@ -12,55 +12,72 @@ DISPLAY_YEARS = 3
 
 
 class Event(object):
-   def __init__(self, description, when, inclusive=False):
+   def __init__(self, description, when, inclusive=False, stop=None):
       self.description = description
       self.when = when
+      self.stop = stop
       self.inclusive = inclusive
 
    @classmethod
    def from_string(cls, s):
       parts = s.split(' ')
-      date = parts[0]
+      dates = parts[0].split('/')
       description = ' '.join(parts[1:])
 
       inclusive = False
-      if date[-1] == '!':
+
+      start_str = dates[0]
+      if start_str[-1] == '!':
          inclusive = True
-         date = date[:-1]
+         start_str = start_str[:-1]
+
+      stop_str = None
+      if len(dates) > 1:
+         stop_str = dates[1]
+         if stop_str[-1] == '!':
+            inclusive = True
+            stop_str = stop_str[:-1]
 
       try:
-         when = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+         when = datetime.datetime.strptime(start_str, '%Y-%m-%d').date()
       except ValueError:
          return None
 
-      return Event(description, when, inclusive)
+      stop = None
+      if stop_str:
+         try:
+            stop = datetime.datetime.strptime(stop_str, '%Y-%m-%d').date()
+         except ValueError:
+            return None
 
-   def relative_days(self):
+      return Event(description, when, inclusive, stop)
+
+   def relative_days(self, when):
       '''Returns relative date, such as 5 (if remaining) or -5 (if past).
 
       '''
-      days = (self.when - datetime.date.today()).days
+      days = (self.when - when).days
       if days > 0:
          return days + (1 if self.inclusive else 0)
       else:
          return days - (1 if self.inclusive else 0)
 
-   def relative_months(self):
-      days = self.relative_days()
+   def relative_months(self, when):
+      days = self.relative_days(when)
       return float(days) / 30.
 
-   def relative_years(self):
-      days = self.relative_days()
+   def relative_years(self, when):
+      days = self.relative_days(when)
       return float(days) / 365.
 
-   def to_string(self, display):
+   def get_rel_time(self, display, when):
       # Get the value
       if display == DISPLAY_DAYS:
-         delta = self.relative_days()
+         delta = self.relative_days(when)
       elif display == DISPLAY_MONTHS:
-         delta = self.relative_months()
+         delta = self.relative_months(when)
       elif display == DISPLAY_YEARS:
-         delta = self.relative_years()
+         delta = self.relative_years(when)
 
       if delta > 0:
          dir_text = 'left'
@@ -75,8 +92,25 @@ class Event(object):
          delta = '%5.2f months %-4s' % (delta, dir_text)
       elif display == DISPLAY_YEARS:
          delta = '%5.2f years %-4s' % (delta, dir_text)
+      return delta
 
-      return '%s - %s' % (delta, self.description)
+   def to_string(self, display):
+      when = self.stop
+      has_stop = self.stop != None
+      if not when or datetime.date.today() < when:
+         when = datetime.date.today()
+         has_stop = False
+      delta = self.get_rel_time(display, when)
+
+      desc = self.description
+      if has_stop:
+         desc += ' (started %s, stopped %s)' % (
+               self.get_rel_time(display, datetime.date.today()).strip(),
+               self.stop.strftime('%Y-%m-%d'),
+            )
+
+
+      return '%s - %s' % (delta, desc)
 
 class Section(object):
    def __init__(self, description):

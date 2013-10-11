@@ -12,13 +12,14 @@ Example output:
 
 Countdown reads $HOME/.countdownrc (or other if specified on the command line)
 and parses events from it. Dates are specified in YYYY-mm-dd format. If a date
-ends in !, it includes both end days, otherwise, it only includes one. Blank
-lines and lines starting with # are ignored. Sections can be created by making
-the first char -.
+ends in !, it includes both end days, otherwise, it only includes one. If the
+second date is specified for an event, that indicates the event is not ongoing
+and ended on the specified date. Blank lines and lines starting with # are
+ignored. Sections can be created by making the first char -.
 
 Example config file:
 
     - Section Title
-    YYYY-mm-dd[!] [event description]
+    YYYY-mm-dd[/YYYY-mm-dd][!] [event description]
 
 
